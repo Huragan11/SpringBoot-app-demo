@@ -1,28 +1,22 @@
 package com.huragan11;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
-
 
     public List<Customer> getCustomers() {
         return customerRepository.findAll();
     }
 
     public Customer getCustomer(Integer id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        return customer.orElseThrow();
+        return customerRepository.findById(id).orElseThrow();
     }
 
     public void createCustomer(String name, String email, Integer age) {
@@ -35,26 +29,17 @@ public class CustomerService {
 
 
     public void updateCustomer(Integer id, String name, String email) {
-        Optional<Customer> customer = customerRepository.findById(id);
-
-        if (!customer.isPresent()) {
-            throw new NoSuchElementException();
+        if (customerRepository.existsById(id)) {
+            Customer c = customerRepository.findById(id).orElseThrow();
+            c.setName(name);
+            c.setEmail(email);
+            customerRepository.save(c);
         }
-
-        customer.get().setName(name);
-        customer.get().setEmail(email);
-
-        customerRepository.save(customer.get());
     }
 
     public void deleteCustomer(Integer id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-
-        if (customer.isPresent()) {
+        if (customerRepository.existsById(id)) {
             customerRepository.deleteById(id);
-        } else {
-            throw new NoSuchElementException();
         }
     }
-
 }
