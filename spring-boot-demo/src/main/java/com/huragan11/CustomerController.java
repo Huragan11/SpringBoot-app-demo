@@ -1,20 +1,17 @@
 package com.huragan11;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/customers")
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public List<Customer> getCustomers() {
@@ -22,36 +19,29 @@ public class CustomerController {
     }
 
     @GetMapping("{customerId}")
-    public Customer getCustomer(@PathVariable("customerId") Integer customerId) {
-        return customerService.getCustomer(customerId);
+    public ResponseEntity<Customer> getCustomer(@PathVariable("customerId") Integer customerId) {
+        return ResponseEntity.ok(customerService.getCustomer(customerId));
     }
 
     @PostMapping
-    public void addCustomer(@RequestBody NewCustomerRequest request) {
-        customerService.createCustomer(request.name(), request.email(), request.age());
+    public ResponseEntity<String> addCustomer(@RequestBody NewCustomerRequest request) {
+        customerService.createCustomer(request.getName(), request.getEmail(), request.getAge());
+        return ResponseEntity.ok("Customer created");
     }
 
     @DeleteMapping("{customerId}")
-    public void deleteCustomer(@PathVariable("customerId") Integer id) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable("customerId") Integer id) {
         customerService.deleteCustomer(id);
+        return ResponseEntity.ok("Customer deleted");
+
     }
 
     @PutMapping("{customerId}")
-    public void updateCustomer(@PathVariable("customerId") Integer id, @RequestBody UpdateCustomerRequest customerRequest) {
-        customerService.updateCustomer(id, customerRequest.name(), customerRequest.email());
-    }
-
-    record UpdateCustomerRequest(
-            @RequestParam("name") String name,
-            @RequestParam("email") String email
-    ) {
-    }
-
-    record NewCustomerRequest(
-            String name,
-            String email,
-            Integer age
-    ) {
+    public ResponseEntity<String> updateCustomer(
+            @PathVariable("customerId") Integer id,
+            @RequestBody UpdateCustomerRequest customerRequest) {
+        customerService.updateCustomer(id, customerRequest.getName(), customerRequest.getEmail());
+        return ResponseEntity.ok("Customer updated");
     }
 
 }
